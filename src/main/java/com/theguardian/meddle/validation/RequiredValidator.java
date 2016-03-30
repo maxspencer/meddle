@@ -1,6 +1,9 @@
-package com.theguardian.meddle;
+package com.theguardian.meddle.validation;
 
 import android.content.Context;
+
+import com.theguardian.meddle.R;
+import com.theguardian.meddle.fields.Field;
 
 /**
  * Created by max on 26/03/16.

@@ -2,6 +2,9 @@ package com.theguardian.meddle;
 
 import android.content.Context;
 
+import com.theguardian.meddle.fields.EmailField;
+import com.theguardian.meddle.fields.TextField;
+
 /**
  * Created by max on 24/03/16.
  */

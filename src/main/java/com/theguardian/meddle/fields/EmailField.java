@@ -1,4 +1,4 @@
-package com.theguardian.meddle;
+package com.theguardian.meddle.fields;
 
 /**
  * Created by max on 24/03/16.

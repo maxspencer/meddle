@@ -1,6 +1,10 @@
-package com.theguardian.meddle;
+package com.theguardian.meddle.fields;
 
 import android.view.View;
+
+import com.theguardian.meddle.validation.RequiredValidator;
+import com.theguardian.meddle.validation.ValidationError;
+import com.theguardian.meddle.validation.Validator;
 
 import java.util.ArrayList;
 import java.util.Collection;

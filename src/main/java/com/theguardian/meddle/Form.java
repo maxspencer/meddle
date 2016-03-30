@@ -3,6 +3,8 @@ package com.theguardian.meddle;
 import android.content.Context;
 import android.view.View;
 
+import com.theguardian.meddle.fields.Field;
+
 import java.util.ArrayList;
 import java.util.List;
 

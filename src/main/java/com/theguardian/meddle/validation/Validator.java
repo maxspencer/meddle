@@ -1,4 +1,4 @@
-package com.theguardian.meddle;
+package com.theguardian.meddle.validation;
 
 /**
  * Created by max on 25/03/16.

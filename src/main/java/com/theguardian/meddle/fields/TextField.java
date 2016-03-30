@@ -1,10 +1,12 @@
-package com.theguardian.meddle;
+package com.theguardian.meddle.fields;
 
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.TextView;
+
+import com.theguardian.meddle.validation.ValidationError;
 
 /**
  * Created by max on 24/03/16.

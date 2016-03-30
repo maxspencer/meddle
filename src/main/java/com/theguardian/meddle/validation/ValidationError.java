@@ -1,4 +1,4 @@
-package com.theguardian.meddle;
+package com.theguardian.meddle.validation;
 
 import android.content.Context;
 
