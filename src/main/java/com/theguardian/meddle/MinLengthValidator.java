@@ -2,8 +2,6 @@ package com.theguardian.meddle;
 
 import android.content.Context;
 
-import com.example.max.meddle.R;
-
 /**
  * Created by max on 26/03/16.
  */
@@ -19,7 +17,7 @@ public class MinLengthValidator implements Validator<Field<CharSequence>> {
     public ValidationError validate(Field<CharSequence> field) {
         final int length = (field.get() != null) ? field.get().length() : 0;
         if (length < minLength) {
-            return new MinLengthError(field, minLength);
+            return new MinLengthError(minLength);
         }
 
         return null;
@@ -28,18 +26,22 @@ public class MinLengthValidator implements Validator<Field<CharSequence>> {
     /**
      * Created by max on 26/03/16.
      */
-    public static class MinLengthError extends ValidationError {
+    public static class MinLengthError implements ValidationError {
 
         private final int minLength;
 
-        public MinLengthError(Field<CharSequence> field, int minLength) {
-            super(field);
+        public MinLengthError(int minLength) {
             this.minLength = minLength;
         }
 
         @Override
-        public String getErrorMessage(Context context) {
-            return context.getString(R.string.min_length_error, getField().getName(), minLength);
+        public String getMessage(Context context) {
+            return context.getString(R.string.error_min_length, minLength);
+        }
+
+        @Override
+        public String getMessageWithName(Context context, String fieldName) {
+            return context.getString(R.string.error_min_length_with_name, fieldName, minLength);
         }
     }
 

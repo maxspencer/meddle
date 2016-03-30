@@ -2,8 +2,6 @@ package com.theguardian.meddle;
 
 import android.content.Context;
 
-import com.example.max.meddle.R;
-
 /**
  * Created by max on 26/03/16.
  */
@@ -12,22 +10,25 @@ public class RequiredValidator implements Validator<Field<?>> {
     @Override
     public ValidationError validate(Field<?> field) {
         if (field.isRequired() && field.isEmpty()) {
-            return new RequiredError(field);
+            return new RequiredError();
         }
 
         return null;
     }
 
-    private class RequiredError extends ValidationError {
+    /**
+     * Created by max on 30/03/16.
+     */
+    public static class RequiredError implements ValidationError {
 
-        public RequiredError(Field field) {
-            super(field);
+        @Override
+        public String getMessage(Context context) {
+            return context.getString(R.string.error_required);
         }
 
         @Override
-        public String getErrorMessage(Context context) {
-            return context.getString(R.string.required_error);
+        public String getMessageWithName(Context context, String fieldName) {
+            return context.getString(R.string.error_required_with_name, fieldName);
         }
-
     }
 }

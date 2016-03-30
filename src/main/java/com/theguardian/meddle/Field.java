@@ -3,6 +3,7 @@ package com.theguardian.meddle;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -12,13 +13,15 @@ public abstract class Field<T>  {
 
     private T value = null; // null implicit default for now
     private final boolean isRequired;
-    private final List<Validator<Field<T>>> validators = new ArrayList<>();
+    private final RequiredValidator requiredValidator = new RequiredValidator();
+    private final List<Validator<T>> validators = new ArrayList<>();
+
+    protected Field() {
+        isRequired = false;
+    }
 
     protected Field(boolean required) {
         isRequired = required;
-        if (required) {
-            validators.add(new RequiredValidator());
-        }
     }
 
     public String getName() {
@@ -54,33 +57,28 @@ public abstract class Field<T>  {
     protected abstract void writeValueToView(T value);
 
     public List<ValidationError> getValidationErrors() {
-        List<ValidationError> errors = new ArrayList<>();
+        final List<ValidationError> errors = new ArrayList<>();
 
-        if (isRequired && isEmpty()) {
-            // TODO
-        }
+        addIfNotNull(errors, requiredValidator.validate(this));
 
         for (Validator<T> validator: validators) {
-            ValidationError error = validator.validate(this);
-            if (error != null) {
-                errors.add(error);
-            }
+            addIfNotNull(errors, validator.validate(value));
         }
 
         return errors;
     }
 
     public boolean isValid() {
-        if (isRequired && isEmpty()) {
+        if (!isValid(requiredValidator, this)) {
             return false;
         }
 
         for (Validator<T> validator: validators) {
-            ValidationError error = validator.validate(this);
-            if (error != null) {
+            if (!isValid(validator, value)) {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -101,6 +99,16 @@ public abstract class Field<T>  {
 
     protected void showValidationErrors(List<ValidationError> errors) {
         showValidationError(errors.get(0));
+    }
+
+    private static <T> boolean isValid(Validator<T> validator, T value) {
+        return validator.validate(value) != null;
+    }
+
+    private static <T> void addIfNotNull(Collection<T> collection, T item) {
+        if (item != null) {
+            collection.add(item);
+        }
     }
 
 }

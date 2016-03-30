@@ -57,7 +57,7 @@ public class TextField extends Field<CharSequence> implements TextWatcher {
 
     @Override
     protected void showValidationError(ValidationError error) {
-        textView.setError(error.getErrorMessage(textView.getContext()));
+        textView.setError(error.getMessage(textView.getContext()));
     }
 
 }
