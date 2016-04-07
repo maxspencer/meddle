@@ -5,4 +5,6 @@
     <string name="error_required_with_name">%s is required</string>
     <string name="error_min_length">Must contain at least %d characters</string>
     <string name="error_min_length_with_name">%1$s must contain at least %2$d characters</string>
+    <string name="error_regex">Invalid</string>
+    <string name="error_regex_with_name">%s is invalid</string>
 </resources>

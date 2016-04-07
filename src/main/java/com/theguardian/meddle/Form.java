@@ -6,8 +6,10 @@ import com.theguardian.meddle.fields.Field;
 import com.theguardian.meddle.validation.ValidationError;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -26,13 +28,25 @@ public abstract class Form {
     }
 
     public void bindTo(List<View> views) {
-        if (views.size() != fields.size()) {
-            throw new IllegalArgumentException("Wrong number of views to bind");
+        if (views == null) {
+            throw new NullPointerException("views cannot be null");
+        }
+        if (fields.size() != views.size()) {
+            throw new IllegalArgumentException(
+                    "Incorrect number of views to bind: expecting " +
+                            fields.size() +
+                            " got " +
+                            views.size()
+            );
         }
 
         for (int i = 0; i < views.size(); i++) {
             fields.get(i).bindTo(views.get(i));
         }
+    }
+
+    public void bindTo(View... views) {
+        bindTo(Arrays.asList(views));
     }
 
     public Map<Field<?>, List<ValidationError>> getValidationErrors() {

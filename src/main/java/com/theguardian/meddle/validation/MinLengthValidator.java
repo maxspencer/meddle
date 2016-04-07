@@ -8,7 +8,7 @@ import com.theguardian.meddle.fields.Field;
 /**
  * Created by max on 26/03/16.
  */
-public class MinLengthValidator implements Validator<Field<CharSequence>> {
+public class MinLengthValidator implements Validator<CharSequence> {
 
     private final int minLength;
 
@@ -17,9 +17,8 @@ public class MinLengthValidator implements Validator<Field<CharSequence>> {
     }
 
     @Override
-    public ValidationError validate(Field<CharSequence> field) {
-        final int length = (field.get() != null) ? field.get().length() : 0;
-        if (length < minLength) {
+    public ValidationError validate(CharSequence value) {
+        if (value.length() < minLength) {
             return new MinLengthError(minLength);
         }
 

@@ -1,5 +1,6 @@
 package com.theguardian.meddle.fields;
 
+import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.theguardian.meddle.validation.RequiredValidator;
@@ -21,11 +22,18 @@ public abstract class Field<T>  {
     private final List<Validator<T>> validators = new ArrayList<>();
 
     protected Field() {
-        isRequired = false;
+        this(false, null);
     }
 
     protected Field(boolean required) {
+        this(required, null);
+    }
+
+    protected Field(boolean required, @Nullable List<? extends Validator<T>> validators) {
         isRequired = required;
+        if (validators != null) {
+            this.validators.addAll(validators);
+        }
     }
 
     public String getName() {

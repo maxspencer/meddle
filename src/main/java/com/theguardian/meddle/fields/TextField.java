@@ -1,12 +1,18 @@
 package com.theguardian.meddle.fields;
 
+import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.TextView;
 
+import com.theguardian.meddle.validation.MinLengthValidator;
 import com.theguardian.meddle.validation.ValidationError;
+import com.theguardian.meddle.validation.Validator;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by max on 24/03/16.
@@ -21,6 +27,14 @@ public class TextField extends Field<CharSequence> implements TextWatcher {
 
     public TextField(boolean required) {
         super(required);
+    }
+
+    public TextField(boolean required, int minLength) {
+        super(required, Collections.singletonList(new MinLengthValidator(minLength)));
+    }
+
+    public TextField(boolean required, int minLength, @Nullable List<? extends Validator<CharSequence>> validators) {
+        super(required, validators);
     }
 
     @Override
