@@ -42,7 +42,9 @@ public abstract class Field<T>  {
 
     public final void set(T value) {
         setWithoutWriteToView(value);
-        writeValueToView(value);
+        if (isBound()) {
+            writeValueToView(value);
+        }
     }
 
     public final void bindTo(View view) {

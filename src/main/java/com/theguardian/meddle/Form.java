@@ -1,5 +1,7 @@
 package com.theguardian.meddle;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.View;
 
 import com.theguardian.meddle.fields.Field;
@@ -23,8 +25,15 @@ public abstract class Form {
 
     }
 
-    protected void addField(Field<?> field) {
+    protected <T extends Field<?>> T addField(T field) {
         fields.add(field);
+        return field;
+    }
+
+    protected <T extends Field<?> & Parcelable> T unpackField(Parcel parcel) {
+        final T field = parcel.readParcelable(getClass().getClassLoader());
+        fields.add(field);
+        return field;
     }
 
     public void bindTo(List<View> views) {

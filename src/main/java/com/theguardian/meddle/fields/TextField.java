@@ -1,8 +1,11 @@
 package com.theguardian.meddle.fields;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -14,30 +17,50 @@ import java.util.List;
 /**
  * Created by max on 24/03/16.
  */
-public class TextField extends Field<CharSequence> implements TextWatcher {
+public class TextField extends Field<String> implements TextWatcher, Parcelable {
 
     private final int minLength;
     private TextView textView;
 
     public TextField() {
         super();
+        Log.d("parcel", "somehow created TextField");
         minLength = 0;
     }
 
     public TextField(boolean required) {
         super(required);
+        Log.d("parcel", "somehow created TextField");
         minLength = 0;
     }
 
     public TextField(boolean required, int minLength) {
         super(required);
+        Log.d("parcel", "somehow created TextField");
         this.minLength = minLength;
     }
+
+    private TextField(Parcel in) {
+        this(in.readInt() == 1, in.readInt());
+        setWithoutWriteToView(in.readString());
+    }
+
+    public static final Creator<TextField> CREATOR = new Creator<TextField>() {
+        @Override
+        public TextField createFromParcel(Parcel in) {
+            return new TextField(in);
+        }
+
+        @Override
+        public TextField[] newArray(int size) {
+            return new TextField[size];
+        }
+    };
 
     @Override
     public void bindToImpl(View view) {
         if (!(view instanceof TextView)) {
-            throw new ClassCastException("can only bind to TextView");
+            throw new ClassCastException("Can only bind to TextView");
         }
         textView = (TextView) view;
         textView.addTextChangedListener(this);
@@ -54,7 +77,7 @@ public class TextField extends Field<CharSequence> implements TextWatcher {
     }
 
     @Override
-    protected void writeValueToView(CharSequence value) {
+    protected void writeValueToView(String value) {
         textView.setText(value);
     }
 
@@ -89,4 +112,15 @@ public class TextField extends Field<CharSequence> implements TextWatcher {
         setWithoutWriteToView(s.toString());
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(isRequired() ? 1 : 0);
+        dest.writeInt(minLength);
+        dest.writeString(get());
+    }
 }
