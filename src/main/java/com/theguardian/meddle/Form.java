@@ -18,12 +18,16 @@ import java.util.Map;
 public abstract class Form {
 
     private List<Field<?>> fields = new ArrayList<>();
+    private boolean isBound = false;
 
     public Form() {
 
     }
 
     public void addField(Field<?> field) {
+        if (isBound) {
+            throw new IllegalStateException("Cannot add fields to form after it has been bound");
+        }
         fields.add(field);
     }
 
@@ -43,10 +47,16 @@ public abstract class Form {
         for (int i = 0; i < views.size(); i++) {
             fields.get(i).bindTo(views.get(i));
         }
+
+        isBound = true;
     }
 
     public void bindTo(View... views) {
         bindTo(Arrays.asList(views));
+    }
+
+    public boolean isBound() {
+        return isBound;
     }
 
     public Map<Field<?>, List<ValidationError>> getValidationErrors() {
