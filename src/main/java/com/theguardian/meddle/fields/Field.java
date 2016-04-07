@@ -1,14 +1,11 @@
 package com.theguardian.meddle.fields;
 
-import android.support.annotation.Nullable;
 import android.view.View;
 
-import com.theguardian.meddle.validation.RequiredValidator;
+import com.theguardian.meddle.validation.RequiredError;
 import com.theguardian.meddle.validation.ValidationError;
-import com.theguardian.meddle.validation.Validator;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -17,23 +14,14 @@ import java.util.List;
 public abstract class Field<T>  {
 
     private T value = null; // null implicit default for now
-    private final boolean isRequired;
-    private final RequiredValidator requiredValidator = new RequiredValidator();
-    private final List<Validator<T>> validators = new ArrayList<>();
+    private final boolean required;
 
     protected Field() {
-        this(false, null);
+        required = false;
     }
 
     protected Field(boolean required) {
-        this(required, null);
-    }
-
-    protected Field(boolean required, @Nullable List<? extends Validator<T>> validators) {
-        isRequired = required;
-        if (validators != null) {
-            this.validators.addAll(validators);
-        }
+        this.required = required;
     }
 
     public String getName() {
@@ -41,10 +29,12 @@ public abstract class Field<T>  {
     }
 
     public boolean isRequired() {
-        return isRequired;
+        return required;
     }
 
     public abstract boolean isEmpty();
+
+    public abstract boolean isBound();
 
     public final T get() {
         return value;
@@ -71,31 +61,19 @@ public abstract class Field<T>  {
     public List<ValidationError> getValidationErrors() {
         final List<ValidationError> errors = new ArrayList<>();
 
-        addIfNotNull(errors, requiredValidator.validate(this));
-
-        for (Validator<T> validator: validators) {
-            addIfNotNull(errors, validator.validate(value));
+        if (isRequired() && isEmpty()) {
+            errors.add(new RequiredError());
         }
 
         return errors;
     }
 
     public boolean isValid() {
-        if (!isValid(requiredValidator, this)) {
-            return false;
-        }
-
-        for (Validator<T> validator: validators) {
-            if (!isValid(validator, value)) {
-                return false;
-            }
-        }
-
-        return true;
+        return getValidationErrors().isEmpty();
     }
 
     public boolean validate() {
-        List<ValidationError> errors = getValidationErrors();
+        final List<ValidationError> errors = getValidationErrors();
         if (errors.isEmpty()) {
             return true;
         } else if (errors.size() == 1) {
@@ -111,16 +89,6 @@ public abstract class Field<T>  {
 
     protected void showValidationErrors(List<ValidationError> errors) {
         showValidationError(errors.get(0));
-    }
-
-    private static <T> boolean isValid(Validator<T> validator, T value) {
-        return validator.validate(value) != null;
-    }
-
-    private static <T> void addIfNotNull(Collection<T> collection, T item) {
-        if (item != null) {
-            collection.add(item);
-        }
     }
 
 }

@@ -1,17 +1,14 @@
 package com.theguardian.meddle.fields;
 
-import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.TextView;
 
-import com.theguardian.meddle.validation.MinLengthValidator;
+import com.theguardian.meddle.validation.MinLengthError;
 import com.theguardian.meddle.validation.ValidationError;
-import com.theguardian.meddle.validation.Validator;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -19,22 +16,22 @@ import java.util.List;
  */
 public class TextField extends Field<CharSequence> implements TextWatcher {
 
+    private final int minLength;
     private TextView textView;
 
     public TextField() {
         super();
+        minLength = 0;
     }
 
     public TextField(boolean required) {
         super(required);
+        minLength = 0;
     }
 
     public TextField(boolean required, int minLength) {
-        super(required, Collections.singletonList(new MinLengthValidator(minLength)));
-    }
-
-    public TextField(boolean required, int minLength, @Nullable List<? extends Validator<CharSequence>> validators) {
-        super(required, validators);
+        super(required);
+        this.minLength = minLength;
     }
 
     @Override
@@ -47,13 +44,34 @@ public class TextField extends Field<CharSequence> implements TextWatcher {
     }
 
     @Override
+    public boolean isEmpty() {
+        return TextUtils.isEmpty(get());
+    }
+
+    @Override
+    public boolean isBound() {
+        return textView != null;
+    }
+
+    @Override
     protected void writeValueToView(CharSequence value) {
         textView.setText(value);
     }
 
     @Override
-    public boolean isEmpty() {
-        return TextUtils.isEmpty(get());
+    public List<ValidationError> getValidationErrors() {
+        final List<ValidationError> errors = super.getValidationErrors();
+
+        if (get().length() < minLength) {
+            errors.add(new MinLengthError(minLength));
+        }
+
+        return errors;
+    }
+
+    @Override
+    protected void showValidationError(ValidationError error) {
+        textView.setError(error.getMessage(textView.getContext()));
     }
 
     @Override
@@ -69,11 +87,6 @@ public class TextField extends Field<CharSequence> implements TextWatcher {
     @Override
     public void afterTextChanged(Editable s) {
         setWithoutWriteToView(s.toString());
-    }
-
-    @Override
-    protected void showValidationError(ValidationError error) {
-        textView.setError(error.getMessage(textView.getContext()));
     }
 
 }
