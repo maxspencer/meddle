@@ -24,37 +24,33 @@ public class TextField extends Field<String> implements TextWatcher, Parcelable 
 
     public TextField() {
         super();
-        Log.d("parcel", "somehow created TextField");
         minLength = 0;
     }
 
     public TextField(boolean required) {
         super(required);
-        Log.d("parcel", "somehow created TextField");
         minLength = 0;
     }
 
     public TextField(boolean required, int minLength) {
         super(required);
-        Log.d("parcel", "somehow created TextField");
         this.minLength = minLength;
     }
 
-    private TextField(Parcel in) {
-        this(in.readInt() == 1, in.readInt());
-        setWithoutWriteToView(in.readString());
-    }
-
     public static final Creator<TextField> CREATOR = new Creator<TextField>() {
+
         @Override
         public TextField createFromParcel(Parcel in) {
-            return new TextField(in);
+            final TextField field = new TextField(in.readInt() == 1, in.readInt());
+            field.setWithoutWriteToView(in.readString());
+            return field;
         }
 
         @Override
         public TextField[] newArray(int size) {
             return new TextField[size];
         }
+
     };
 
     @Override

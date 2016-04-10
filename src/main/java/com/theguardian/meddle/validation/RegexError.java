@@ -7,7 +7,8 @@ import com.theguardian.meddle.R;
 /**
  * Created by max on 07/04/16.
  */
-class RegexError implements ValidationError {
+public class RegexError implements ValidationError {
+
     @Override
     public String getMessage(Context context) {
         return context.getString(R.string.error_regex);
@@ -17,4 +18,5 @@ class RegexError implements ValidationError {
     public String getMessageWithName(Context context, String fieldName) {
         return context.getString(R.string.error_regex_with_name, fieldName);
     }
+
 }
