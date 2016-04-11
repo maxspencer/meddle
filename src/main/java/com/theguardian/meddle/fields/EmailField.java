@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by max on 24/03/16.
  */
-public class EmailField extends TextField {
+public class EmailField extends BaseTextField {
 
     public EmailField() {
         super();
