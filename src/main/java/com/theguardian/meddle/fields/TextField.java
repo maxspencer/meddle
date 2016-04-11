@@ -1,11 +1,10 @@
 package com.theguardian.meddle.fields;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -17,7 +16,9 @@ import java.util.List;
 /**
  * Created by max on 24/03/16.
  */
-public class TextField extends Field<String> implements TextWatcher, Parcelable {
+public class TextField extends Field<String> implements TextWatcher {
+
+    private static final String VALUE_KEY = "value";
 
     private final int minLength;
     private TextView textView;
@@ -36,22 +37,6 @@ public class TextField extends Field<String> implements TextWatcher, Parcelable 
         super(required);
         this.minLength = minLength;
     }
-
-    public static final Creator<TextField> CREATOR = new Creator<TextField>() {
-
-        @Override
-        public TextField createFromParcel(Parcel in) {
-            final TextField field = new TextField(in.readInt() == 1, in.readInt());
-            field.setWithoutWriteToView(in.readString());
-            return field;
-        }
-
-        @Override
-        public TextField[] newArray(int size) {
-            return new TextField[size];
-        }
-
-    };
 
     @Override
     public void bindToImpl(View view) {
@@ -94,6 +79,16 @@ public class TextField extends Field<String> implements TextWatcher, Parcelable 
     }
 
     @Override
+    public void saveState(@NonNull Bundle bundle) {
+        bundle.putString(VALUE_KEY, get());
+    }
+
+    @Override
+    public void restoreState(@NonNull Bundle bundle) {
+        set(bundle.getString(VALUE_KEY, null));
+    }
+
+    @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
         // Unused
     }
@@ -108,15 +103,4 @@ public class TextField extends Field<String> implements TextWatcher, Parcelable 
         setWithoutWriteToView(s.toString());
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(isRequired() ? 1 : 0);
-        dest.writeInt(minLength);
-        dest.writeString(get());
-    }
 }

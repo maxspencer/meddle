@@ -1,5 +1,7 @@
 package com.theguardian.meddle.fields;
 
+import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.View;
 
 import com.theguardian.meddle.validation.RequiredError;
@@ -92,5 +94,9 @@ public abstract class Field<T>  {
     protected void showValidationErrors(List<ValidationError> errors) {
         showValidationError(errors.get(0));
     }
+
+    public abstract void saveState(@NonNull Bundle bundle);
+
+    public abstract void restoreState(@NonNull Bundle bundle);
 
 }

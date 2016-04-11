@@ -1,23 +1,28 @@
 package com.theguardian.meddle;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.theguardian.meddle.fields.Field;
+import com.theguardian.meddle.util.FormatString;
 import com.theguardian.meddle.validation.ValidationError;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
  * Created by max on 24/03/16.
  */
 public abstract class Form {
+
+    private static final FormatString FIELD_KEY = new FormatString("field%d");
 
     private List<Field<?>> fields = new ArrayList<>();
 
@@ -26,12 +31,6 @@ public abstract class Form {
     }
 
     protected <T extends Field<?>> T addField(T field) {
-        fields.add(field);
-        return field;
-    }
-
-    protected <T extends Field<?> & Parcelable> T unpackField(Parcel parcel) {
-        final T field = parcel.readParcelable(getClass().getClassLoader());
         fields.add(field);
         return field;
     }
@@ -90,6 +89,27 @@ public abstract class Form {
         }
 
         return valid;
+    }
+
+    public void saveState(@NonNull Bundle bundle) {
+        for (int i = 0; i < fields.size(); i++) {
+            final Bundle fieldBundle = new Bundle();
+            fields.get(i).saveState(fieldBundle);
+            bundle.putBundle(FIELD_KEY.format(i), fieldBundle);
+        }
+    }
+
+    public void restoreState(@Nullable Bundle bundle) {
+        if (bundle == null) {
+            return;
+        }
+
+        for (int i = 0; i < fields.size(); i++) {
+            final Bundle fieldBundle = bundle.getBundle(FIELD_KEY.format(i));
+            if (fieldBundle != null) {
+                fields.get(i).restoreState(fieldBundle);
+            }
+        }
     }
 
 }
