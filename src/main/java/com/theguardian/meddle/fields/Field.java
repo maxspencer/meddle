@@ -15,6 +15,8 @@ import java.util.List;
  */
 public abstract class Field<T>  {
 
+    protected static final String VALUE_KEY = "value";
+
     private T value = null; // null implicit default for now
     private final boolean required;
 

@@ -15,7 +15,6 @@ import com.theguardian.meddle.validation.ValidationError;
  */
 public abstract class BaseTextField extends Field<String> implements TextWatcher {
 
-    private static final String VALUE_KEY = "value";
     private TextView textView;
 
     public BaseTextField() {
