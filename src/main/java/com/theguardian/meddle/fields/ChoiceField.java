@@ -2,7 +2,6 @@ package com.theguardian.meddle.fields;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -12,7 +11,6 @@ import com.theguardian.meddle.validation.ValidationError;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by max on 11/04/16.
@@ -20,7 +18,7 @@ import java.util.Map;
 public class ChoiceField<T> extends Field<T> {
 
     private final List<T> choices = new ArrayList<>();
-    private ChoiceBinding binding;
+    private ViewBinder<Integer> binding;
 
     public ChoiceField(List<T> choices) {
         super();
@@ -44,21 +42,29 @@ public class ChoiceField<T> extends Field<T> {
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return get() == null;
     }
 
     @Override
     public boolean isBound() {
-        return false;
+        return binding != null;
     }
 
     @Override
     protected void bindToImpl(View view) {
-        binding = ChoiceBinding.getInstance(this, view);
+        if (view instanceof RadioGroup) {
+            binding = new RadioChoiceBinding<>(this, (RadioGroup) view);
+            return;
+        }
+        throw new ClassCastException("Can only bind to a RadioGroup view");
     }
 
     @Override
     protected void writeValueToView(T value) {
+        if (value == null) {
+            return;
+        }
+
         final int index = choices.indexOf(value);
         if (index < 0) { // Not in the list of choices
             throw new IllegalArgumentException("not a valid choice");
@@ -68,38 +74,27 @@ public class ChoiceField<T> extends Field<T> {
 
     @Override
     protected void showValidationError(ValidationError error) {
-
+        binding.showValidationError(error);
     }
 
     @Override
     public void saveState(@NonNull Bundle bundle) {
-
+        // TODO
     }
 
     @Override
     public void restoreState(@NonNull Bundle bundle) {
-
+        // TODO
     }
 
-    private static abstract class ChoiceBinding {
+    private static class RadioChoiceBinding<T>
+            implements ViewBinder<Integer>, RadioGroup.OnCheckedChangeListener {
 
-        public static ChoiceBinding getInstance(ChoiceField field, View view) {
-            if (view instanceof RadioGroup) {
-                return new RadioChoiceBinding(field, (RadioGroup) view);
-            }
-            throw new ClassCastException("Can only bind to a RadioGroup view");
-        }
-
-        public abstract void writeValueToView(Integer value);
-    }
-
-    private static class RadioChoiceBinding extends ChoiceBinding {
-
-        private final ChoiceField field;
+        private final ChoiceField<T> field;
         private final RadioGroup radioGroup;
         private final List<Integer> buttonIds = new ArrayList<>();
 
-        public RadioChoiceBinding(ChoiceField field, RadioGroup radioGroup) {
+        public RadioChoiceBinding(ChoiceField<T> field, RadioGroup radioGroup) {
             this.field = field;
             this.radioGroup = radioGroup;
 
@@ -114,11 +109,36 @@ public class ChoiceField<T> extends Field<T> {
                     buttonIds.add(childView.getId());
                 }
             }
+
+            // Check there are the correct number of RadioButtons
+            if (buttonIds.size() != field.choices.size()) {
+                throw new IllegalArgumentException(
+                        "Incorrect number of RadioButtons to bind: expecting " +
+                                field.choices.size() +
+                                " got " +
+                                buttonIds.size()
+                );
+            }
+
+            radioGroup.setOnCheckedChangeListener(this);
         }
 
         @Override
         public void writeValueToView(Integer value) {
-            buttonIds.get(value);
+            radioGroup.check(buttonIds.get(value));
         }
+
+        @Override
+        public void showValidationError(ValidationError error) {
+            ((RadioButton) radioGroup.findViewById(buttonIds.get(0))).setError(error.getMessage(radioGroup.getContext()));
+        }
+
+        @Override
+        public void onCheckedChanged(RadioGroup group, int checkedId) {
+            final int choiceIndex = buttonIds.indexOf(checkedId);
+            field.set(field.choices.get(choiceIndex));
+        }
+
     }
+
 }

@@ -51,16 +51,16 @@ public abstract class Field<T>  {
         }
     }
 
+    protected final void setWithoutWriteToView(T value) {
+        this.value = value;
+    }
+
     public final void bindTo(View view) {
         bindToImpl(view);
         writeValueToView(value);
     }
 
     protected abstract void bindToImpl(View view);
-
-    protected final void setWithoutWriteToView(T value) {
-        this.value = value;
-    }
 
     protected abstract void writeValueToView(T value);
 
