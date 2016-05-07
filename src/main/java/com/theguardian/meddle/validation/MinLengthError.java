@@ -5,7 +5,7 @@ import android.content.Context;
 import com.theguardian.meddle.R;
 
 /**
- * Created by max on 26/03/16.
+ * A {@link ValidationError} returned when the input a field is too short.
  */
 public class MinLengthError implements ValidationError {
 

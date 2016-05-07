@@ -10,15 +10,15 @@ import java.util.List;
 
 /**
  * A {@link Field} which can be bound to {@link android.widget.EditText} views and accepts valid
- * email addresses.
+ * phone numbers.
  */
-public class EmailField extends BaseTextField {
+public class PhoneNumberField extends BaseTextField {
 
-    public EmailField() {
+    public PhoneNumberField() {
         super();
     }
 
-    public EmailField(boolean required) {
+    public PhoneNumberField(boolean required) {
         super(required);
     }
 
@@ -26,11 +26,10 @@ public class EmailField extends BaseTextField {
     public List<ValidationError> getValidationErrors() {
         final List<ValidationError> errors = super.getValidationErrors();
 
-        if (!TextUtils.isEmpty(get()) && !Patterns.EMAIL_ADDRESS.matcher(get()).matches()) {
+        if (!TextUtils.isEmpty(get()) && !Patterns.PHONE.matcher(get()).matches()) {
             errors.add(new InvalidError());
         }
 
         return errors;
     }
-
 }

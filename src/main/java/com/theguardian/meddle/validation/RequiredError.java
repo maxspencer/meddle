@@ -5,7 +5,7 @@ import android.content.Context;
 import com.theguardian.meddle.R;
 
 /**
- * Created by max on 30/03/16.
+ * A {@link ValidationError} returned when a field requires a value but none is given.
  */
 public class RequiredError implements ValidationError {
 
