@@ -8,24 +8,38 @@ import com.theguardian.meddle.validation.RequiredError;
 import com.theguardian.meddle.validation.ValidationError;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by max on 24/03/16.
  */
 public abstract class Field<T>  {
 
+    public interface FieldValidityListener {
+
+        void onValid(Field<?> field);
+
+        void onInvalid(Field<?> field);
+
+    }
+
     protected static final String VALUE_KEY = "value";
 
     private T value = null; // null implicit default for now
     private final boolean required;
+    private boolean previouslyValid;
+    private final Set<FieldValidityListener> validityListeners = new HashSet<>();
 
     protected Field() {
         required = false;
+        previouslyValid = isValid();
     }
 
     protected Field(boolean required) {
         this.required = required;
+        previouslyValid = isValid();
     }
 
     public String getName() {
@@ -46,9 +60,22 @@ public abstract class Field<T>  {
 
     public final void set(T value) {
         setWithoutWriteToView(value);
+
         if (isBound()) {
             writeValueToView(value);
         }
+
+        final boolean nowValid = isValid();
+        if (!validityListeners.isEmpty() && nowValid != previouslyValid) {
+            for (FieldValidityListener listener : validityListeners) {
+                if (nowValid) {
+                    listener.onValid(this);
+                } else {
+                    listener.onInvalid(this);
+                }
+            }
+        }
+        previouslyValid = nowValid;
     }
 
     public final void bindTo(View view) {
@@ -100,5 +127,13 @@ public abstract class Field<T>  {
     public abstract void saveState(@NonNull Bundle bundle);
 
     public abstract void restoreState(@NonNull Bundle bundle);
+
+    public void addValidityListener(FieldValidityListener listener) {
+        validityListeners.add(listener);
+    }
+
+    public void removeValidityListener(FieldValidityListener listener) {
+        validityListeners.remove(listener);
+    }
 
 }
