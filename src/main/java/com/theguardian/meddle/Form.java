@@ -1,8 +1,6 @@
 package com.theguardian.meddle;
 
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -24,7 +22,13 @@ public abstract class Form {
 
     private static final FormatString FIELD_KEY = new FormatString("field%d");
 
-    private List<Field<?>> fields = new ArrayList<>();
+    private final List<Field<?>> fields = new ArrayList<>();
+    private final Field.FieldValidityListener fieldListener = new Field.FieldValidityListener() {
+        @Override
+        public void onValidityChanged(@NonNull Field<?> field, boolean valid) {
+            // TODO
+        }
+    };
 
     public Form() {
 
@@ -32,6 +36,7 @@ public abstract class Form {
 
     protected <T extends Field<?>> T addField(T field) {
         fields.add(field);
+        field.addValidityListener(fieldListener);
         return field;
     }
 

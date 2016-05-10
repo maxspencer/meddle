@@ -19,9 +19,7 @@ public abstract class Field<T>  {
 
     public interface FieldValidityListener {
 
-        void onValid(Field<?> field);
-
-        void onInvalid(Field<?> field);
+        void onValidityChanged(@NonNull Field<?> field, boolean valid);
 
     }
 
@@ -68,11 +66,7 @@ public abstract class Field<T>  {
         final boolean nowValid = isValid();
         if (!validityListeners.isEmpty() && nowValid != previouslyValid) {
             for (FieldValidityListener listener : validityListeners) {
-                if (nowValid) {
-                    listener.onValid(this);
-                } else {
-                    listener.onInvalid(this);
-                }
+                listener.onValidityChanged(this, nowValid);
             }
         }
         previouslyValid = nowValid;
