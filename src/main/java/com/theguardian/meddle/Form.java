@@ -12,8 +12,10 @@ import com.theguardian.meddle.validation.ValidationError;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by max on 24/03/16.
@@ -23,10 +25,22 @@ public abstract class Form {
     private static final FormatString FIELD_KEY = new FormatString("field%d");
 
     private final List<Field<?>> fields = new ArrayList<>();
+
+    private final Set<Field<?>> invalidFields = new HashSet<>();
     private final Field.FieldValidityListener fieldListener = new Field.FieldValidityListener() {
         @Override
         public void onValidityChanged(@NonNull Field<?> field, boolean valid) {
-            // TODO
+            if (valid) {
+                invalidFields.remove(field);
+                if (invalidFields.isEmpty()) {
+                    // TODO transitioning from invalid to valid
+                }
+            } else {
+                if (invalidFields.isEmpty()) {
+                    // TODO transitioning from valid to invalid
+                }
+                invalidFields.add(field);
+            }
         }
     };
 
@@ -36,6 +50,9 @@ public abstract class Form {
 
     protected <T extends Field<?>> T addField(T field) {
         fields.add(field);
+        if (!field.isValid()) {
+            invalidFields.add(field);
+        }
         field.addValidityListener(fieldListener);
         return field;
     }
