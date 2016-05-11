@@ -5,7 +5,7 @@ import android.text.TextUtils;
 /**
  * TODO
  */
-public class MinLengthValidator extends BaseValidator<CharSequence> {
+public class MinLengthValidator extends Validator<CharSequence> {
 
     private final int minLength;
 

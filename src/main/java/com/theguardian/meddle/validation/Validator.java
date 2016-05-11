@@ -5,11 +5,19 @@ import android.support.annotation.Nullable;
 /**
  * TODO
  */
-public interface Validator<T> {
+public abstract class Validator<T> {
 
     @Nullable
-    ValidationError getError(T value);
+    public final ValidationError getError(T value) {
+        if (!isValid(value)) {
+            return newError(value);
+        } else {
+            return null;
+        }
+    }
 
-    boolean isValid(T value);
+    protected abstract ValidationError newError(T value);
+
+    public abstract boolean isValid(T value);
 
 }

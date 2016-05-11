@@ -1,7 +1,6 @@
 package com.theguardian.meddle.validation;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Patterns;
 
@@ -10,36 +9,25 @@ import java.util.regex.Pattern;
 /**
  * TODO
  */
-public enum RegexValidator implements Validator<CharSequence> {
+public class RegexValidator extends Validator<CharSequence> {
 
-    EMAIL(Patterns.EMAIL_ADDRESS),
-    PHONE(Patterns.PHONE);
+    public static final RegexValidator EMAIL = new RegexValidator(Patterns.EMAIL_ADDRESS);
+    public static final RegexValidator PHONE = new RegexValidator(Patterns.PHONE);
 
-    @NonNull private final Validator<CharSequence> validator;
+    @NonNull private final Pattern pattern;
 
-    RegexValidator(@NonNull final Pattern pattern) {
-        validator = new BaseValidator<CharSequence>() {
-            @Override
-            protected ValidationError newError(CharSequence value) {
-                return new ValidationError();
-            }
-
-            @Override
-            public boolean isValid(CharSequence value) {
-                return !TextUtils.isEmpty(value) && pattern.matcher(value).matches();
-            }
-        };
+    public RegexValidator(@NonNull Pattern pattern) {
+        this.pattern = pattern;
     }
 
-    @Nullable
     @Override
-    public ValidationError getError(CharSequence value) {
-        return validator.getError(value);
+    protected ValidationError newError(CharSequence value) {
+        return new ValidationError();
     }
 
     @Override
     public boolean isValid(CharSequence value) {
-        return validator.isValid(value);
+        return !TextUtils.isEmpty(value) && pattern.matcher(value).matches();
     }
 
 }
