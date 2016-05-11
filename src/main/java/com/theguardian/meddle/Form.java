@@ -69,7 +69,6 @@ public abstract class Form {
             invalidFields.add(field);
         }
         field.addValidityListener(fieldValidityListener);
-        // TODO should we notify validity listeners if the newly added field changes the validity of the form as a whole?
         return field;
     }
 
@@ -98,24 +97,15 @@ public abstract class Form {
     public Map<Field<?>, List<ValidationError>> getValidationErrors() {
         final Map<Field<?>, List<ValidationError>> errors = new HashMap<>();
 
-        for (Field<?> field: fields) {
-            final List<ValidationError> fieldErrors = field.getValidationErrors();
-            if (!fieldErrors.isEmpty()) {
-                errors.put(field, fieldErrors);
-            }
+        for (Field<?> field: invalidFields) {
+            errors.put(field, field.getValidationErrors());
         }
 
         return errors;
     }
 
     public boolean isValid() {
-        for (Field<?> field: fields) {
-            if (!field.isValid()) {
-                return false;
-            }
-        }
-
-        return true;
+        return invalidFields.isEmpty();
     }
 
     public boolean validate() {
