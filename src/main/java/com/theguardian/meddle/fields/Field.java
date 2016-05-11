@@ -2,10 +2,12 @@ package com.theguardian.meddle.fields;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.theguardian.meddle.validation.RequiredError;
 import com.theguardian.meddle.validation.ValidationError;
+import com.theguardian.meddle.validation.Validator;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -27,17 +29,26 @@ public abstract class Field<T>  {
 
     private T value = null; // null implicit default for now
     private final boolean required;
-    private boolean previouslyValid;
+    private final List<Validator<? super T>> validators = new ArrayList<>();
+    private boolean prevValid;
     private final Set<FieldValidityListener> validityListeners = new HashSet<>();
 
     protected Field() {
-        required = false;
-        previouslyValid = isValid();
+        this(false, null);
+    }
+
+    protected Field(@Nullable T defaultValue) {
+        this(false, defaultValue);
     }
 
     protected Field(boolean required) {
+        this(required, null);
+    }
+
+    protected Field(boolean required, @Nullable T value) {
         this.required = required;
-        previouslyValid = isValid();
+        this.value = value;
+        prevValid = isValid();
     }
 
     public String getName() {
@@ -57,19 +68,19 @@ public abstract class Field<T>  {
     }
 
     public final void set(T value) {
-        setWithoutWriteToView(value);
-
-        if (isBound()) {
-            writeValueToView(value);
-        }
+        this.value = value;
 
         final boolean nowValid = isValid();
-        if (!validityListeners.isEmpty() && nowValid != previouslyValid) {
+        if (!validityListeners.isEmpty() && nowValid != prevValid) {
             for (FieldValidityListener listener : validityListeners) {
                 listener.onValidityChanged(this, nowValid);
             }
         }
-        previouslyValid = nowValid;
+        prevValid = nowValid;
+
+        if (isBound()) {
+            writeValueToView(value);
+        }
     }
 
     public final void bindTo(View view) {
@@ -79,27 +90,44 @@ public abstract class Field<T>  {
 
     protected abstract void bindToImpl(View view);
 
-    protected final void setWithoutWriteToView(T value) {
-        this.value = value;
-    }
-
     protected abstract void writeValueToView(T value);
 
-    public List<ValidationError> getValidationErrors() {
+    protected void addValidator(Validator<? super T> validator) {
+        validators.add(validator);
+    }
+
+    public final List<ValidationError> getValidationErrors() {
         final List<ValidationError> errors = new ArrayList<>();
 
         if (isRequired() && isEmpty()) {
             errors.add(new RequiredError());
         }
 
+        for (Validator<? super T> validator: validators) {
+            final ValidationError error = validator.getError(value);
+            if (error != null) {
+                errors.add(error);
+            }
+        }
+
         return errors;
     }
 
-    public boolean isValid() {
-        return getValidationErrors().isEmpty();
+    public final boolean isValid() {
+        if (isRequired() && isEmpty()) {
+            return false;
+        }
+
+        for (Validator<? super T> validator: validators) {
+            if (!validator.isValid(value)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    public boolean validate() {
+    public final boolean validate() {
         final List<ValidationError> errors = getValidationErrors();
         if (errors.isEmpty()) {
             return true;

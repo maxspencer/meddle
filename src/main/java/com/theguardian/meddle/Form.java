@@ -22,24 +22,39 @@ import java.util.Set;
  */
 public abstract class Form {
 
+    public interface FormValidityListener {
+
+        void onValidityChanged(@NonNull Form form, boolean valid);
+
+    }
+
     private static final FormatString FIELD_KEY = new FormatString("field%d");
 
     private final List<Field<?>> fields = new ArrayList<>();
 
     private final Set<Field<?>> invalidFields = new HashSet<>();
-    private final Field.FieldValidityListener fieldListener = new Field.FieldValidityListener() {
+    private final Set<FormValidityListener> formValidityListeners = new HashSet<>();
+    private final Field.FieldValidityListener fieldValidityListener = new Field.FieldValidityListener() {
         @Override
         public void onValidityChanged(@NonNull Field<?> field, boolean valid) {
             if (valid) {
-                invalidFields.remove(field);
-                if (invalidFields.isEmpty()) {
-                    // TODO transitioning from invalid to valid
+                if (invalidFields.remove(field) && invalidFields.isEmpty()) {
+                    // field was removed and invalidFields is now empty so we are transitioning
+                    // from the form being invalid to being valid
+                    for (FormValidityListener listener: formValidityListeners) {
+                        listener.onValidityChanged(Form.this, true);
+                    }
                 }
             } else {
-                if (invalidFields.isEmpty()) {
-                    // TODO transitioning from valid to invalid
-                }
+                final boolean wasEmpty = invalidFields.isEmpty();
                 invalidFields.add(field);
+                if (wasEmpty) {
+                    // invalidFields was empty before, but now contains one invalid field so we
+                    // are transitioning from the form being valid to being invalid
+                    for (FormValidityListener listener: formValidityListeners) {
+                        listener.onValidityChanged(Form.this, false);
+                    }
+                }
             }
         }
     };
@@ -53,7 +68,8 @@ public abstract class Form {
         if (!field.isValid()) {
             invalidFields.add(field);
         }
-        field.addValidityListener(fieldListener);
+        field.addValidityListener(fieldValidityListener);
+        // TODO should we notify validity listeners if the newly added field changes the validity of the form as a whole?
         return field;
     }
 
@@ -132,6 +148,14 @@ public abstract class Form {
                 fields.get(i).restoreState(fieldBundle);
             }
         }
+    }
+
+    public void addValidityListener(FormValidityListener listener) {
+        formValidityListeners.add(listener);
+    }
+
+    public void removeValidityListener(FormValidityListener listener) {
+        formValidityListeners.remove(listener);
     }
 
 }

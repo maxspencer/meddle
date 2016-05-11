@@ -46,7 +46,9 @@ public abstract class BaseTextField extends Field<String> implements TextWatcher
 
     @Override
     protected void writeValueToView(String value) {
-        textView.setText(value);
+        if (!textView.getText().toString().equals(value)) {
+            textView.setText(value);
+        }
     }
 
     @Override
@@ -76,7 +78,7 @@ public abstract class BaseTextField extends Field<String> implements TextWatcher
 
     @Override
     public void afterTextChanged(Editable s) {
-        setWithoutWriteToView(s.toString());
+        set(s.toString());
     }
 
 }
