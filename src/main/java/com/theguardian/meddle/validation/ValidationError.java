@@ -1,11 +1,28 @@
 package com.theguardian.meddle.validation;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
+
+import com.theguardian.meddle.R;
 
 /**
- * Interface for all errors returned when validating a {@link com.theguardian.meddle.fields.Field}.
+ * Base class for all errors returned when validating a {@link com.theguardian.meddle.fields.Field}.
  */
-public interface ValidationError {
+public class ValidationError {
+
+    @StringRes private final int message;
+    @StringRes private final int messageWithName;
+
+    public ValidationError() {
+        this.message = R.string.error_invalid;
+        this.messageWithName = R.string.error_invalid_with_name;
+    }
+
+    public ValidationError(@StringRes int message, @StringRes int messageWithName) {
+        this.message = message;
+        this.messageWithName = messageWithName;
+    }
 
     /**
      * Returns a String describing this error without the name of the invalid field. For example
@@ -14,7 +31,10 @@ public interface ValidationError {
      * @param context to use to create the String
      * @return the String describing this error
      */
-    String getMessage(Context context);
+    @NonNull
+    public String getMessage(@NonNull Context context) {
+        return context.getString(message);
+    }
 
     /**
      * Returns a String describing this error with the name of the invalid field.
@@ -23,6 +43,9 @@ public interface ValidationError {
      * @param fieldName the name of the field to include
      * @return the String describing this error
      */
-    String getMessageWithName(Context context, String fieldName);
+    @NonNull
+    public String getMessageWithName(@NonNull Context context, @NonNull String fieldName) {
+        return context.getString(messageWithName, fieldName);
+    }
 
 }
