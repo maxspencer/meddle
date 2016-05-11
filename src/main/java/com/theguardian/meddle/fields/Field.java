@@ -10,6 +10,7 @@ import com.theguardian.meddle.validation.ValidationError;
 import com.theguardian.meddle.validation.Validator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -103,10 +104,12 @@ public abstract class Field<T>  {
             errors.add(new RequiredError());
         }
 
-        for (Validator<? super T> validator: validators) {
-            final ValidationError error = validator.getError(value);
-            if (error != null) {
-                errors.add(error);
+        if (!isEmpty()) {
+            for (Validator<? super T> validator : validators) {
+                final ValidationError error = validator.getError(value);
+                if (error != null) {
+                    errors.add(error);
+                }
             }
         }
 
@@ -118,9 +121,11 @@ public abstract class Field<T>  {
             return false;
         }
 
-        for (Validator<? super T> validator: validators) {
-            if (!validator.isValid(value)) {
-                return false;
+        if (!isEmpty()) {
+            for (Validator<? super T> validator: validators) {
+                if (!validator.isValid(value)) {
+                    return false;
+                }
             }
         }
 
