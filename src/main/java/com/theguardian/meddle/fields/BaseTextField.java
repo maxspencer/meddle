@@ -51,10 +51,19 @@ public abstract class BaseTextField extends Field<String> implements TextWatcher
     }
 
     @Override
-    protected void writeValueToView(String value) {
-        if (!textView.getText().toString().equals(value)) {
-            textView.setText(value);
+    protected String readFromView() {
+        if (textView == null) {
+            throw new IllegalStateException("No view bound to this field");
         }
+        return textView.getText().toString();
+    }
+
+    @Override
+    protected void writeToView(String value) {
+        if (textView == null) {
+            throw new IllegalStateException("No view bound to this field");
+        }
+        textView.setText(value);
     }
 
     @Override

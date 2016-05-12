@@ -79,20 +79,36 @@ public abstract class Field<T>  {
         prevValid = nowValid;
 
         if (isBound()) {
-            writeValueToView(value);
+            if (!readFromView().equals(value)) {
+                writeToView(value);
+            }
         }
     }
 
     public final void bindView(View view) {
         bindViewImpl(view);
-        writeValueToView(value);
+        writeToView(value);
     }
 
     protected abstract void bindViewImpl(View view);
 
     public abstract void unbindView();
 
-    protected abstract void writeValueToView(T value);
+    /**
+     * Read the value currently displayed by the view bound to this field.
+     *
+     * @return the value the bound field is currently displaying
+     * @throws IllegalStateException if no view is bound
+     */
+    protected abstract T readFromView();
+
+    /**
+     * Write a value to the view bound to this field.
+     *
+     * @param value for the bound view to display
+     * @throws IllegalStateException if no view is bound
+     */
+    protected abstract void writeToView(T value);
 
     protected void addValidator(Validator<? super T> validator) {
         validators.add(validator);

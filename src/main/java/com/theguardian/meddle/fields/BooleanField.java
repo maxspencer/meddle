@@ -48,7 +48,18 @@ public class BooleanField extends Field<Boolean> implements CompoundButton.OnChe
     }
 
     @Override
-    protected void writeValueToView(Boolean value) {
+    protected Boolean readFromView() {
+        if (compoundButton == null) {
+            throw new IllegalStateException("No view bound to this field");
+        }
+        return compoundButton.isChecked();
+    }
+
+    @Override
+    protected void writeToView(Boolean value) {
+        if (compoundButton == null) {
+            throw new IllegalStateException("No view bound to this field");
+        }
         compoundButton.setChecked(value != null && value);
     }
 
