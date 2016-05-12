@@ -15,7 +15,7 @@ public class MinLengthValidator extends Validator<CharSequence> {
 
     @Override
     public boolean isValid(CharSequence value) {
-        return TextUtils.isEmpty(value) && value.length() >= minLength;
+        return !TextUtils.isEmpty(value) && value.length() >= minLength;
     }
 
     @Override
