@@ -26,12 +26,18 @@ public abstract class BaseTextField extends Field<String> implements TextWatcher
     }
 
     @Override
-    public void bindToImpl(View view) {
+    public void bindViewImpl(View view) {
         if (!(view instanceof TextView)) {
             throw new ClassCastException("Can only bind to TextView");
         }
         textView = (TextView) view;
         textView.addTextChangedListener(this);
+    }
+
+    @Override
+    public void unbindView() {
+        textView.removeTextChangedListener(this);
+        textView = null;
     }
 
     @Override

@@ -33,12 +33,18 @@ public class BooleanField extends Field<Boolean> implements CompoundButton.OnChe
     }
 
     @Override
-    protected void bindToImpl(View view) {
+    protected void bindViewImpl(View view) {
         if (!(view instanceof CompoundButton)) {
             throw new ClassCastException("BooleanField can only be bound to a CompoundButton");
         }
         compoundButton = (CompoundButton) view;
         compoundButton.setOnCheckedChangeListener(this);
+    }
+
+    @Override
+    public void unbindView() {
+        compoundButton.setOnCheckedChangeListener(null);
+        compoundButton = null;
     }
 
     @Override

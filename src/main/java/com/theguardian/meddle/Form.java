@@ -72,7 +72,7 @@ public abstract class Form {
         return field;
     }
 
-    public void bindTo(List<View> views) {
+    public void bindViews(List<View> views) {
         if (views == null) {
             throw new NullPointerException("views cannot be null");
         }
@@ -86,12 +86,18 @@ public abstract class Form {
         }
 
         for (int i = 0; i < views.size(); i++) {
-            fields.get(i).bindTo(views.get(i));
+            fields.get(i).bindView(views.get(i));
         }
     }
 
-    public void bindTo(View... views) {
-        bindTo(Arrays.asList(views));
+    public void bindViews(View... views) {
+        bindViews(Arrays.asList(views));
+    }
+
+    public void unbindViews() {
+        for (Field<?> field: fields) {
+            field.unbindView();
+        }
     }
 
     public Map<Field<?>, List<ValidationError>> getValidationErrors() {

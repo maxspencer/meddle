@@ -83,12 +83,14 @@ public abstract class Field<T>  {
         }
     }
 
-    public final void bindTo(View view) {
-        bindToImpl(view);
+    public final void bindView(View view) {
+        bindViewImpl(view);
         writeValueToView(value);
     }
 
-    protected abstract void bindToImpl(View view);
+    protected abstract void bindViewImpl(View view);
+
+    public abstract void unbindView();
 
     protected abstract void writeValueToView(T value);
 
