@@ -4,18 +4,18 @@ import com.theguardian.meddle.validation.RegexValidator;
 
 /**
  * A {@link Field} which can be bound to {@link android.widget.EditText} views and accepts valid
- * email addresses.
+ * phone numbers.
  */
-public class EmailField extends BaseTextField {
+public class PhoneNumberField extends BaseTextField {
 
-    public EmailField() {
+    public PhoneNumberField() {
         super();
-        addValidator(RegexValidator.EMAIL);
+        addValidator(RegexValidator.PHONE);
     }
 
-    public EmailField(boolean required) {
+    public PhoneNumberField(boolean required) {
         super(required);
-        addValidator(RegexValidator.EMAIL);
+        addValidator(RegexValidator.PHONE);
     }
 
 }

@@ -1,8 +1,6 @@
 package com.theguardian.meddle;
 
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -14,17 +12,52 @@ import com.theguardian.meddle.validation.ValidationError;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by max on 24/03/16.
  */
 public abstract class Form {
 
+    public interface FormValidityListener {
+
+        void onValidityChanged(@NonNull Form form, boolean valid);
+
+    }
+
     private static final FormatString FIELD_KEY = new FormatString("field%d");
 
-    private List<Field<?>> fields = new ArrayList<>();
+    private final List<Field<?>> fields = new ArrayList<>();
+
+    private final Set<Field<?>> invalidFields = new HashSet<>();
+    private final Set<FormValidityListener> formValidityListeners = new HashSet<>();
+    private final Field.FieldValidityListener fieldValidityListener = new Field.FieldValidityListener() {
+        @Override
+        public void onValidityChanged(@NonNull Field<?> field, boolean valid) {
+            if (valid) {
+                if (invalidFields.remove(field) && invalidFields.isEmpty()) {
+                    // field was removed and invalidFields is now empty so we are transitioning
+                    // from the form being invalid to being valid
+                    for (FormValidityListener listener: formValidityListeners) {
+                        listener.onValidityChanged(Form.this, true);
+                    }
+                }
+            } else {
+                final boolean wasEmpty = invalidFields.isEmpty();
+                invalidFields.add(field);
+                if (wasEmpty) {
+                    // invalidFields was empty before, but now contains one invalid field so we
+                    // are transitioning from the form being valid to being invalid
+                    for (FormValidityListener listener: formValidityListeners) {
+                        listener.onValidityChanged(Form.this, false);
+                    }
+                }
+            }
+        }
+    };
 
     public Form() {
 
@@ -32,10 +65,14 @@ public abstract class Form {
 
     protected <T extends Field<?>> T addField(T field) {
         fields.add(field);
+        if (!field.isValid()) {
+            invalidFields.add(field);
+        }
+        field.addValidityListener(fieldValidityListener);
         return field;
     }
 
-    public void bindTo(List<View> views) {
+    public void bindViews(List<View> views) {
         if (views == null) {
             throw new NullPointerException("views cannot be null");
         }
@@ -49,35 +86,32 @@ public abstract class Form {
         }
 
         for (int i = 0; i < views.size(); i++) {
-            fields.get(i).bindTo(views.get(i));
+            fields.get(i).bindView(views.get(i));
         }
     }
 
-    public void bindTo(View... views) {
-        bindTo(Arrays.asList(views));
+    public void bindViews(View... views) {
+        bindViews(Arrays.asList(views));
+    }
+
+    public void unbindViews() {
+        for (Field<?> field: fields) {
+            field.unbindView();
+        }
     }
 
     public Map<Field<?>, List<ValidationError>> getValidationErrors() {
         final Map<Field<?>, List<ValidationError>> errors = new HashMap<>();
 
-        for (Field<?> field: fields) {
-            final List<ValidationError> fieldErrors = field.getValidationErrors();
-            if (!fieldErrors.isEmpty()) {
-                errors.put(field, fieldErrors);
-            }
+        for (Field<?> field: invalidFields) {
+            errors.put(field, field.getValidationErrors());
         }
 
         return errors;
     }
 
     public boolean isValid() {
-        for (Field<?> field: fields) {
-            if (!field.isValid()) {
-                return false;
-            }
-        }
-
-        return true;
+        return invalidFields.isEmpty();
     }
 
     public boolean validate() {
@@ -110,6 +144,14 @@ public abstract class Form {
                 fields.get(i).restoreState(fieldBundle);
             }
         }
+    }
+
+    public void addValidityListener(FormValidityListener listener) {
+        formValidityListeners.add(listener);
+    }
+
+    public void removeValidityListener(FormValidityListener listener) {
+        formValidityListeners.remove(listener);
     }
 
 }

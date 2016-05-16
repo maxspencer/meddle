@@ -26,12 +26,18 @@ public abstract class BaseTextField extends Field<String> implements TextWatcher
     }
 
     @Override
-    public void bindToImpl(View view) {
+    public void bindViewImpl(View view) {
         if (!(view instanceof TextView)) {
             throw new ClassCastException("Can only bind to TextView");
         }
         textView = (TextView) view;
         textView.addTextChangedListener(this);
+    }
+
+    @Override
+    public void unbindView() {
+        textView.removeTextChangedListener(this);
+        textView = null;
     }
 
     @Override
@@ -45,7 +51,18 @@ public abstract class BaseTextField extends Field<String> implements TextWatcher
     }
 
     @Override
-    protected void writeValueToView(String value) {
+    protected String readFromView() {
+        if (textView == null) {
+            throw new IllegalStateException("No view bound to this field");
+        }
+        return textView.getText().toString();
+    }
+
+    @Override
+    protected void writeToView(String value) {
+        if (textView == null) {
+            throw new IllegalStateException("No view bound to this field");
+        }
         textView.setText(value);
     }
 
@@ -76,7 +93,7 @@ public abstract class BaseTextField extends Field<String> implements TextWatcher
 
     @Override
     public void afterTextChanged(Editable s) {
-        setWithoutWriteToView(s.toString());
+        set(s.toString());
     }
 
 }

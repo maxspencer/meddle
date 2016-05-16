@@ -15,18 +15,16 @@ public class BooleanField extends Field<Boolean> implements CompoundButton.OnChe
     private CompoundButton compoundButton = null;
 
     public BooleanField() {
-        super();
-        set(false);
+        super(false);
     }
 
     public BooleanField(boolean required) {
-        super(required);
-        set(false);
+        super(required, false);
     }
 
     @Override
     public boolean isEmpty() {
-        return !compoundButton.isChecked();
+        return get() == null || !get();
     }
 
     @Override
@@ -35,7 +33,7 @@ public class BooleanField extends Field<Boolean> implements CompoundButton.OnChe
     }
 
     @Override
-    protected void bindToImpl(View view) {
+    protected void bindViewImpl(View view) {
         if (!(view instanceof CompoundButton)) {
             throw new ClassCastException("BooleanField can only be bound to a CompoundButton");
         }
@@ -44,7 +42,24 @@ public class BooleanField extends Field<Boolean> implements CompoundButton.OnChe
     }
 
     @Override
-    protected void writeValueToView(Boolean value) {
+    public void unbindView() {
+        compoundButton.setOnCheckedChangeListener(null);
+        compoundButton = null;
+    }
+
+    @Override
+    protected Boolean readFromView() {
+        if (compoundButton == null) {
+            throw new IllegalStateException("No view bound to this field");
+        }
+        return compoundButton.isChecked();
+    }
+
+    @Override
+    protected void writeToView(Boolean value) {
+        if (compoundButton == null) {
+            throw new IllegalStateException("No view bound to this field");
+        }
         compoundButton.setChecked(value != null && value);
     }
 
@@ -65,7 +80,9 @@ public class BooleanField extends Field<Boolean> implements CompoundButton.OnChe
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        setWithoutWriteToView(isChecked);
+        if (isChecked != get()) {
+            set(isChecked);
+        }
         compoundButton.setError(null);
     }
 }
