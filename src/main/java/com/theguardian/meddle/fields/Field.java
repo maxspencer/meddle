@@ -92,7 +92,9 @@ public abstract class Field<T>  {
 
     protected abstract void bindViewImpl(View view);
 
-    public abstract void unbindView();
+    public void unbindView() {
+
+    }
 
     /**
      * Read the value currently displayed by the view bound to this field.

@@ -51,7 +51,7 @@ public class ChoiceField<T> extends Field<T> {
     }
 
     @Override
-    protected void bindToImpl(View view) {
+    protected void bindViewImpl(View view) {
         if (view instanceof RadioGroup) {
             binding = new RadioChoiceBinding<>(this, (RadioGroup) view);
             return;
@@ -60,7 +60,16 @@ public class ChoiceField<T> extends Field<T> {
     }
 
     @Override
-    protected void writeValueToView(T value) {
+    protected T readFromView() {
+        final int index = binding.readFromView();
+        if (index < 0 || index >= choices.size()) {
+            throw new IllegalStateException("not a valid choice");
+        }
+        return choices.get(index);
+    }
+
+    @Override
+    protected void writeToView(T value) {
         if (value == null) {
             return;
         }
@@ -69,7 +78,7 @@ public class ChoiceField<T> extends Field<T> {
         if (index < 0) { // Not in the list of choices
             throw new IllegalArgumentException("not a valid choice");
         }
-        binding.writeValueToView(index);
+        binding.writeToView(index);
     }
 
     @Override
@@ -124,7 +133,12 @@ public class ChoiceField<T> extends Field<T> {
         }
 
         @Override
-        public void writeValueToView(Integer value) {
+        public Integer readFromView() {
+            return buttonIds.indexOf(radioGroup.getCheckedRadioButtonId());
+        }
+
+        @Override
+        public void writeToView(Integer value) {
             radioGroup.check(buttonIds.get(value));
         }
 
